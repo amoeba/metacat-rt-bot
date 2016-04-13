@@ -38,7 +38,7 @@ def create_message(count, identifiers, url):
     identifiers_string = "\n".join(identifiers_fmt[:MAX_ITEMS])
     url_esc = url.replace('&', '&amp;')  # Slack says escape ambersands
 
-    return "Hey {}, {} new object{} were just inserted. Here are the first {}:\n\n{}\n\nJust thought I'd let you know. You can see more detail at {}.".format(USERS,
+    return "Hey {}, {} new object{} were just modified. Here are the first {}:\n\n{}\n\nJust thought I'd let you know. You can see more detail at {}.".format(USERS,
                                                                                                                                                               count,
                                                                                                                                                               plural_s,
                                                                                                                                                               cap,
