@@ -20,9 +20,10 @@ was run and the current time.
   Include the following variables:
 
   ```
-  LASTFILE_PATH=LASTRUN      # Determines where the bot stores its state
-  MAX_ITEMS=5                # Determines the number of items to send in chat
-  SLACK_WEBHOOK_URL="{URL}"  # Your Slack webhook URL
+  LASTFILE_PATH=LASTRUN       # Determines where the bot stores its state
+  MAX_ITEMS=5                 # Determines the number of items to send in chat
+  SLACK_WEBHOOK_URL="{URL}"   # Your Slack webhook URL
+  USERS="@you @me @everyone"  # Who you want to direct the message to
   ```
 
 ## Running
