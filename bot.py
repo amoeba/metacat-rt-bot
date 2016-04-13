@@ -69,8 +69,10 @@ def get_object_identifiers(doc):
 def get_last_run():
     last_run = None
 
-    if os.path.isfile(LASTFILE_PATH):
-        with open(LASTFILE_PATH, "r") as f:
+    path = os.path.join(os.path.dirname(__file__), LASTFILE_PATH)
+
+    if os.path.isfile(path):
+        with open(path, "r") as f:
             last_run = f.read().splitlines()[0]
     else:
         last_run = now()
@@ -97,7 +99,7 @@ def main():
     if (count > 0):
         send_message(create_message(count, identifiers, url))
 
-    with open(LASTFILE_PATH, "w") as f:
+    with open(os.path.join(os.path.dirname(__file__), LASTFILE_PATH), "w") as f:
         f.write(to_date)
 
 
