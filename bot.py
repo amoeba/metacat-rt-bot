@@ -18,6 +18,7 @@ load_dotenv(dotenv_path)
 LASTFILE_PATH = os.environ.get("LASTFILE_PATH")
 MAX_ITEMS = int(os.environ.get("MAX_ITEMS"))
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
+USERS = os.environ.get("USERS")
 
 
 def send_message(message):
@@ -37,11 +38,12 @@ def create_message(count, identifiers, url):
     identifiers_string = "\n".join(identifiers_fmt[:MAX_ITEMS])
     url_esc = url.replace('&', '&amp;')  # Slack says escape ambersands
 
-    return "Hey @bryce, {} new object{} were just inserted. Here are the first {}:\n\n{}\n\nJust thought I'd let you know. You can see more detail at {}.".format(count,
-                                                                                                                                                                  plural_s,
-                                                                                                                                                                  cap,
-                                                                                                                                                                  identifiers_string,
-                                                                                                                                                                  url_esc)
+    return "Hey {}, {} new object{} were just inserted. Here are the first {}:\n\n{}\n\nJust thought I'd let you know. You can see more detail at {}.".format(USERS,
+                                                                                                                                                              count,
+                                                                                                                                                              plural_s,
+                                                                                                                                                              cap,
+                                                                                                                                                              identifiers_string,
+                                                                                                                                                              url_esc)
 
 
 def create_list_objects_url(from_date, to_date):
