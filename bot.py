@@ -97,9 +97,6 @@ def main():
     count = get_count(doc)
     identifiers = get_object_identifiers(doc)
 
-    print(url)
-    print(count)
-
     if (count > 0):
         send_message(create_message(count, identifiers, url))
 
