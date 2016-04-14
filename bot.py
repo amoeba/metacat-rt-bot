@@ -26,10 +26,6 @@ def send_message(message):
 
 
 def create_message(count, identifiers, url):
-    plural_s = ""
-    if (count > 0):
-        plural_s = "s"
-
     cap = count
     if (count > MAX_ITEMS):
         cap = MAX_ITEMS
@@ -38,12 +34,20 @@ def create_message(count, identifiers, url):
     identifiers_string = "\n".join(identifiers_fmt[:MAX_ITEMS])
     url_esc = url.replace('&', '&amp;')  # Slack says escape ambersands
 
-    return "Hey {}, {} new object{} were just modified. Here are the first {}:\n\n{}\n\nJust thought I'd let you know. You can see more detail at {}.".format(USERS,
-                                                                                                                                                              count,
-                                                                                                                                                              plural_s,
-                                                                                                                                                              cap,
-                                                                                                                                                              identifiers_string,
-                                                                                                                                                              url_esc)
+    message = None
+
+    if (count == 1):
+        message = "Hey {}, {} object was just modified: {}. Just thought I'd let you know. You can see more detail at {}.".format(USERS,
+                                                                                                                                  count,
+                                                                                                                                  identifiers[0],
+                                                                                                                                  url_esc)
+    else:
+        message = "Hey {}, {} objects were just modified. Here are the first {}:\n\n{}\n\nJust thought I'd let you know. You can see more detail at {}.".format(USERS,
+                                                                                                                                                                count,
+                                                                                                                                                                cap,
+                                                                                                                                                                identifiers_string,
+                                                                                                                                                                url_esc)
+    return message
 
 
 def create_list_objects_url(from_date, to_date):
