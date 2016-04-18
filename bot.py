@@ -25,28 +25,29 @@ def send_message(message):
     return requests.post(SLACK_WEBHOOK_URL, data=json.dumps({'text': message}))
 
 
-def create_message(count, identifiers, url):
-    cap = count
-    if (count > MAX_ITEMS):
-        cap = MAX_ITEMS
-
-    identifiers_fmt = ["- {}".format(identifier) for identifier in identifiers]
-    identifiers_string = "\n".join(identifiers_fmt[:MAX_ITEMS])
+def create_message(count, url):
     url_esc = url.replace('&', '&amp;')  # Slack says escape ambersands
 
     message = None
 
+    # Deal with plural forms of strings
     if (count == 1):
-        message = "Hey {}, {} object was just modified: {}. Just thought I'd let you know. You can see more detail at {}.".format(USERS,
-                                                                                                                                  count,
-                                                                                                                                  identifiers[0],
-                                                                                                                                  url_esc)
+        objects = "object"
+        was = "was"
     else:
-        message = "Hey {}, {} objects were just modified. Here are the first {}:\n\n{}\n\nJust thought I'd let you know. You can see more detail at {}.".format(USERS,
-                                                                                                                                                                count,
-                                                                                                                                                                cap,
-                                                                                                                                                                identifiers_string,
-                                                                                                                                                                url_esc)
+        objects = "objects"
+        was = "were"
+
+    template = ("Hey {}, {} {} {} just modified. ",
+                "Just thought I'd let you know. ",
+                "You can see more detail at {}.")
+
+    message = template.format(USERS,
+                              count,
+                              objects,
+                              was,
+                              url_esc)
+
     return message
 
 
@@ -95,10 +96,9 @@ def main():
     url = create_list_objects_url(from_date, to_date)
     doc = list_objects(url)
     count = get_count(doc)
-    identifiers = get_object_identifiers(doc)
 
     if (count > 0):
-        send_message(create_message(count, identifiers, url))
+        send_message(create_message(count, url))
 
     with open(os.path.join(os.path.dirname(__file__), LASTFILE_PATH), "w") as f:
         f.write(to_date)
