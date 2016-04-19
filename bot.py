@@ -38,8 +38,8 @@ def create_message(count, url):
         objects = "objects"
         was = "were"
 
-    template = ("Hey {}, {} {} {} just modified. ",
-                "Just thought I'd let you know. ",
+    template = ("Hey {}, {} {} {} just modified. "
+                "Just thought I'd let you know. "
                 "You can see more detail at {}.")
 
     message = template.format(USERS,
