@@ -58,6 +58,7 @@ def create_list_objects_url(from_date, to_date):
 
 def list_objects(url):
     response = requests.get(url)
+
     try:
         xmldoc = ElementTree.fromstring(response.content)
     except ElementTree.ParseError as err:
@@ -67,7 +68,7 @@ def list_objects(url):
         print(response.content)
 
         raise
-        
+
     return xmldoc
 
 
