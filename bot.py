@@ -11,6 +11,7 @@ import datetime
 from xml.etree import ElementTree
 import requests
 from dotenv import load_dotenv
+import rt
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -98,6 +99,25 @@ def get_last_run():
 def now():
     return datetime.datetime.utcnow().isoformat()
 
+
+def ticket_find(tracker, pid):
+    ids = [t['id'] for t in tracker.search(Queue='arcticdata', Subject__like=pid)]
+
+    if len(ids) > 0:
+        return ids[0]
+    else:
+        return None
+
+
+def ticket_create(tracker, pid):
+    rt.create_ticket(Queue='arcticdata',
+                     Subject="{}".format(pid),
+                     Text="This ticket was automatically created by the listobjects bot because the PID {} was created. See https://github.nceas.ucsb.edu/KNB/arctic-data/blob/master/docs/handling-submissions.md for more information on what to do.".format(pid))
+
+
+def ticket_reply(tracker, ticket_id):
+    tracker.reply(ticket_id,
+                  text="PID {} was updated and needs moderation.")
 
 def main():
     from_date = get_last_run()
