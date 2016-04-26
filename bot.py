@@ -57,7 +57,17 @@ def create_list_objects_url(from_date, to_date):
 
 def list_objects(url):
     response = requests.get(url)
-    return ElementTree.fromstring(response.content)
+    try:
+        xmldoc = ElementTree.fromstring(response.content)
+    except ElementTree.ParseError as err:
+        print("Error while parsing list_objects() response.")
+        print("Error: {}".format(err))
+        print("Response content:")
+        print(response.content)
+
+        raise
+        
+    return xmldoc
 
 
 def get_count(doc):
