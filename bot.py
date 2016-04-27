@@ -49,7 +49,9 @@ def create_message(count, url):
 
 
 def create_list_objects_url(from_date, to_date):
-    return "https://arcticdata.io/metacat/d1/mn/v2/object?fromDate={}&toDate={}".format(from_date, to_date)
+    return ("https://arcticdata.io/"
+            "metacat/d1/mn/v2/object?fromDate={}&toDate={}").format(from_date,
+                                                                    to_date)
 
 
 def list_objects(url):
@@ -98,7 +100,8 @@ def now():
 
 
 def ticket_find(tracker, pid):
-    ids = [t['id'] for t in tracker.search(Queue='arcticdata', Subject__like=pid)]
+    ids = [t['id'] for t in tracker.search(Queue='arcticdata',
+                                           Subject__like=pid)]
 
     if len(ids) > 0:
         return ids[0]
@@ -109,12 +112,17 @@ def ticket_find(tracker, pid):
 def ticket_create(tracker, pid):
     rt.create_ticket(Queue='arcticdata',
                      Subject="{}".format(pid),
-                     Text="This ticket was automatically created by the listobjects bot because the PID {} was created. See https://github.nceas.ucsb.edu/KNB/arctic-data/blob/master/docs/handling-submissions.md for more information on what to do.".format(pid))
+                     Text=("This ticket was automatically created by the "
+                           "listobjects bot because the PID {} was created. "
+                           "See https://github.nceas.ucsb.edu/KNB/arctic-data/"
+                           "blob/master/docs/handling-submissions.md for more "
+                           "information on what to do.").format(pid))
 
 
 def ticket_reply(tracker, ticket_id):
     tracker.reply(ticket_id,
                   text="PID {} was updated and needs moderation.")
+
 
 def main():
     from_date = get_last_run()
