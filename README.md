@@ -11,6 +11,7 @@ was run and the current time.
 - Extra packages (install via requirements.txt):
   - [requests](http://docs.python-requests.org/en/master/)
   - [python-dotenv](https://github.com/theskumar/python-dotenv)
+  - [python-rt](https://gitlab.labs.nic.cz/labs/python-rt)
 
 ## Setup
 
