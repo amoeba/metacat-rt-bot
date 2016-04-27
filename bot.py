@@ -43,11 +43,7 @@ def create_message(count, url):
                 "Just thought I'd let you know. "
                 "You can see more detail at {}.")
 
-    message = template.format(USERS,
-                              count,
-                              objects,
-                              was,
-                              url_esc)
+    message = template.format(USERS, count, objects, was, url_esc)
 
     return message
 
