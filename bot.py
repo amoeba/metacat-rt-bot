@@ -100,7 +100,7 @@ def create_list_objects_url(from_date, to_date):
                                                       to_date)
 
 
-# Member Node functioins
+# Member Node functions
 
 def list_objects(url):
     response = requests.get(url)
