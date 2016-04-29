@@ -1,7 +1,8 @@
 ''' bot.py
 
     Grabs the latest count and list of identifiers add to the Arctic Data
-    Center and pastes them into the #arctic Slack channel. More details to come.
+    Center and pastes them into the #arctic Slack channel. Also creates tickets
+    in RT for any registry-created objects that don't have tickets.
 '''
 
 
