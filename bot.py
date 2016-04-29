@@ -34,7 +34,7 @@ def send_message(message):
     return requests.post(SLACK_WEBHOOK_URL, data=json.dumps({'text': message}))
 
 
-def create_message(count, url):
+def create_list_objects_message(count, url):
     url_esc = url.replace('&', '&amp;')  # Slack says escape ambersands
 
     message = None
@@ -198,7 +198,7 @@ def main():
     count = get_count(doc)
 
     if count > 0:
-        send_message(create_message(count, url))
+        send_message(create_list_objects_message(count, url))
 
         tickets = create_or_update_tickets(get_metadata(doc))
         send_message(create_tickets_message(tickets))
