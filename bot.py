@@ -170,9 +170,9 @@ def ticket_create(tracker, pid):
     return ticket
 
 
-def ticket_reply(tracker, ticket_id):
+def ticket_reply(tracker, ticket_id, identifier):
     tracker.reply(ticket_id,
-                  text="PID {} was updated and needs moderation.")
+                  text="PID {} was updated and needs moderation.".format(identifier))
 
 
 def create_or_update_tickets(identifiers):
@@ -193,7 +193,7 @@ def create_or_update_tickets(identifiers):
         if ticket is None:
             tickets.append(ticket_create(tracker, identifier))
         else:
-            ticket_reply(tracker, ticket)
+            ticket_reply(tracker, ticket, identifier)
 
     return tickets
 
