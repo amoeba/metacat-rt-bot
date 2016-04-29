@@ -173,14 +173,16 @@ def ticket_find(tracker, pid):
 
 
 def ticket_create(tracker, pid):
-    tracker.create_ticket(Queue='arcticdata',
-                          Subject="New submission: {}".format(pid),
-                          Owner=RT_TICKET_OWNER,
-                          Text=("This ticket was automatically created by the "
-                                "listobjects bot because the PID {} was modified. "
-                                "See https://github.nceas.ucsb.edu/KNB/arctic-data/"
-                                "blob/master/docs/handling-submissions.md for more "
-                                "information on what to do.").format(pid))
+    ticket = tracker.create_ticket(Queue='arcticdata',
+                                   Subject="New submission: {}".format(pid),
+                                   Owner=RT_TICKET_OWNER,
+                                   Text=("This ticket was automatically created by the "
+                                         "listobjects bot because the PID {} was modified. "
+                                         "See https://github.nceas.ucsb.edu/KNB/arctic-data/"
+                                         "blob/master/docs/handling-submissions.md for more "
+                                         "information on what to do.").format(pid))
+
+    return ticket
 
 
 def ticket_reply(tracker, ticket_id):
