@@ -17,7 +17,6 @@ import rt
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 LASTFILE_PATH = os.environ.get("LASTFILE_PATH")
-MAX_ITEMS = int(os.environ.get("MAX_ITEMS"))
 BASE_URL = os.environ.get("BASE_URL")
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
 USERS = os.environ.get("USERS")
