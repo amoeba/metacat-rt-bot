@@ -147,7 +147,7 @@ def get_metadata(doc):
 # RT functions
 
 def ticket_find(tracker, pid):
-    title = 'Submission: {}'.format(pid)
+    title = 'New submission: {}'.format(pid)
     results = tracker.search(Queue='arcticdata', Subject__like=title)
     ids = [t['id'].replace('ticket/', '') for t in results]
 
