@@ -41,7 +41,7 @@ def create_message(count, url):
     message = None
 
     # Deal with plural forms of strings
-    if (count == 1):
+    if count == 1:
         objects = "object"
         was = "was"
     else:
@@ -69,9 +69,9 @@ def create_tickets_message(tickets):
 
 
 def create_list_objects_url(from_date, to_date):
-    return ("https://arcticdata.io/"
-            "metacat/d1/mn/v2/object?fromDate={}&toDate={}").format(from_date,
-                                                                    to_date)
+    return ("{}/object?fromDate={}&toDate={}").format(BASE_URL,
+                                                      from_date,
+                                                      to_date)
 
 
 def list_objects(url):
@@ -196,13 +196,13 @@ def main():
     doc = list_objects(url)
     count = get_count(doc)
 
-    if (count > 0):
+    if count > 0:
         send_message(create_message(count, url))
 
-    with open(os.path.join(os.path.dirname(__file__), LASTFILE_PATH), "w") as f:
-        f.write(to_date)
         tickets = create_or_update_tickets(get_metadata(doc))
         send_message(create_tickets_message(tickets))
+
+    save_last_run(to_date)
 
 
 if __name__ == "__main__":
