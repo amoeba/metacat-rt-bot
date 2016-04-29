@@ -30,6 +30,33 @@ PID_STARTSWITH = "arctic-data."
 EML_FMT_ID = "eml://ecoinformatics.org/eml-2.1.1"
 
 
+# General functions
+
+def now():
+    return datetime.datetime.utcnow().isoformat()
+
+
+def get_last_run():
+    last_run = None
+
+    path = os.path.join(os.path.dirname(__file__), LASTFILE_PATH)
+
+    if os.path.isfile(path):
+        with open(path, "r") as f:
+            last_run = f.read().splitlines()[0]
+    else:
+        last_run = now()
+
+    return last_run
+
+
+def save_last_run(to_date):
+    with open(os.path.join(os.path.dirname(__file__), LASTFILE_PATH), "w") as f:
+        f.write(to_date)
+
+
+# Slack functions
+
 def send_message(message):
     return requests.post(SLACK_WEBHOOK_URL, data=json.dumps({'text': message}))
 
@@ -73,6 +100,8 @@ def create_list_objects_url(from_date, to_date):
                                                       to_date)
 
 
+# Member Node functioins
+
 def list_objects(url):
     response = requests.get(url)
 
@@ -114,51 +143,7 @@ def get_metadata(doc):
     return metadata
 
 
-def now():
-    return datetime.datetime.utcnow().isoformat()
-
-
-def get_last_run():
-    last_run = None
-
-    path = os.path.join(os.path.dirname(__file__), LASTFILE_PATH)
-
-    if os.path.isfile(path):
-        with open(path, "r") as f:
-            last_run = f.read().splitlines()[0]
-    else:
-        last_run = now()
-
-    return last_run
-
-
-def save_last_run(to_date):
-    with open(os.path.join(os.path.dirname(__file__), LASTFILE_PATH), "w") as f:
-        f.write(to_date)
-
-
-def create_or_update_tickets(identifiers):
-    if len(identifiers) <= 0:
-        return None
-
-    tracker = rt.Rt("{}/REST/1.0/".format(RT_URL), RT_USER, RT_PASS)
-
-    if tracker.login() is False:
-        send_message("Hey @bryce, I failed to log into RT. Something's wrong!")
-        raise Exception("Failed to log in to RT.")
-
-    tickets = []
-
-    for identifier in identifiers:
-        ticket = ticket_find(tracker, identifier)
-
-        if ticket is None:
-            tickets.append(ticket_create(tracker, identifier))
-        else:
-            ticket_reply(tracker, ticket)
-
-    return tickets
-
+# RT functions
 
 def ticket_find(tracker, pid):
     title = 'Submission: {}'.format(pid)
@@ -188,6 +173,31 @@ def ticket_reply(tracker, ticket_id):
     tracker.reply(ticket_id,
                   text="PID {} was updated and needs moderation.")
 
+
+def create_or_update_tickets(identifiers):
+    if len(identifiers) <= 0:
+        return None
+
+    tracker = rt.Rt("{}/REST/1.0/".format(RT_URL), RT_USER, RT_PASS)
+
+    if tracker.login() is False:
+        send_message("Hey @bryce, I failed to log into RT. Something's wrong!")
+        raise Exception("Failed to log in to RT.")
+
+    tickets = []
+
+    for identifier in identifiers:
+        ticket = ticket_find(tracker, identifier)
+
+        if ticket is None:
+            tickets.append(ticket_create(tracker, identifier))
+        else:
+            ticket_reply(tracker, ticket)
+
+    return tickets
+
+
+# main()
 
 def main():
     from_date = get_last_run()
