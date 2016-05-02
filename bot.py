@@ -176,16 +176,16 @@ def ticket_reply(tracker, ticket_id, identifier):
 
 
 def create_or_update_tickets(identifiers):
+    tickets = []
+
     if len(identifiers) <= 0:
-        return None
+        return tickets
 
     tracker = rt.Rt("{}/REST/1.0/".format(RT_URL), RT_USER, RT_PASS)
 
     if tracker.login() is False:
         send_message("Hey @bryce, I failed to log into RT. Something's wrong!")
         raise Exception("Failed to log in to RT.")
-
-    tickets = []
 
     for identifier in identifiers:
         ticket = ticket_find(tracker, identifier)
@@ -212,7 +212,9 @@ def main():
         send_message(create_list_objects_message(count, url))
 
         tickets = create_or_update_tickets(get_metadata(doc))
-        send_message(create_tickets_message(tickets))
+
+        if len(tickets) > 0:
+            send_message(create_tickets_message(tickets))
 
     save_last_run(to_date)
 
