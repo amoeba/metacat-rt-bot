@@ -152,7 +152,7 @@ def ticket_find(tracker, pid):
     # so a new ticket isn't created for updates
     pid_noversion = '.'.join(pid.split('.')[0:2])
 
-    title = 'New submission: {}'.format(pid_noversion)
+    title = '{}'.format(pid_noversion)
     results = tracker.search(Queue='arcticdata', Subject__like=title)
     ids = [t['id'].replace('ticket/', '') for t in results]
 
