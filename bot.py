@@ -24,7 +24,6 @@ USERS = os.environ.get("USERS")
 RT_URL = os.environ.get("RT_URL")
 RT_USER = os.environ.get("RT_USER")
 RT_PASS = os.environ.get("RT_PASS")
-RT_TICKET_OWNER = os.environ.get("RT_TICKET_OWNER")
 
 # Hard-coded variables
 PID_STARTSWITH = "arctic-data."
@@ -165,7 +164,6 @@ def ticket_find(tracker, pid):
 def ticket_create(tracker, pid):
     ticket = tracker.create_ticket(Queue='arcticdata',
                                    Subject="New submission: {}".format(pid),
-                                   Owner=RT_TICKET_OWNER,
                                    Text=create_ticket_text(pid))
 
     return ticket
