@@ -6,6 +6,7 @@
 '''
 
 
+import sys
 import os.path
 import json
 import datetime
@@ -59,6 +60,20 @@ def save_last_run(to_date):
 
 def send_message(message):
     return requests.post(SLACK_WEBHOOK_URL, data=json.dumps({'text': message}))
+
+
+def test_slack():
+    """Send a test message to slack."""
+
+    print("Sending a test message...")
+
+    r = requests.post(SLACK_WEBHOOK_URL, data=json.dumps({'text': "Testing"}))
+
+    if r.status_code != 200:
+        print("Status: {}".format(r.status_code))
+        print("Response: {}".format(r.text))
+
+    r
 
 
 def create_list_objects_message(count, url):
@@ -206,6 +221,16 @@ def create_or_update_tickets(identifiers):
 # main()
 
 def main():
+    # Process arguments
+    args = sys.argv
+
+    if len(args) == 2:
+        if args[1] == "-t" or args[1] == "--test":
+            test_slack()
+
+            return
+
+    # Continue normal bot operation
     from_date = get_last_run()
     to_date = now()
 
