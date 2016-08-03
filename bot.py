@@ -240,7 +240,7 @@ def main():
     count = get_count(doc)
 
     if count > 0:
-        send_message(create_list_objects_message(count, url))
+        # send_message(create_list_objects_message(count, url))
 
         tickets = create_or_update_tickets(get_metadata(doc))
 
