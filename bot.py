@@ -214,6 +214,7 @@ def create_or_update_tickets(identifiers):
             tickets.append(ticket_create(tracker, identifier))
         else:
             ticket_reply(tracker, ticket, identifier)
+            tickets.append(ticket)
 
     return tickets
 
