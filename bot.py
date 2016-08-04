@@ -99,7 +99,7 @@ def create_list_objects_message(count, url):
 
 
 def create_tickets_message(tickets):
-    message = "The following tickets were just created:\n"
+    message = "The following tickets were just created or updated:\n"
 
     for ticket in tickets:
         ticket_url = "{}/Ticket/Display.html?id={}".format(RT_URL, ticket)
