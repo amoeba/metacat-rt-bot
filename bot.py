@@ -191,8 +191,8 @@ def create_ticket_text(pid):
 
 
 def ticket_reply(tracker, ticket_id, identifier):
-    tracker.reply(ticket_id,
-                  text="PID {} was updated and needs moderation.".format(identifier))
+    tracker.comment(ticket_id,
+                    text="PID {} was updated and needs moderation.".format(identifier))
 
 
 def create_or_update_tickets(identifiers):
