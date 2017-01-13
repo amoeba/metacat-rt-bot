@@ -108,15 +108,6 @@ def create_tickets_message(tickets):
 
     return message
 
-
-def create_autogen_pid_message(pids):
-    if pids is None:
-        return None
-
-    message = "The following objects were just created with the Registry: {}. They may or may not already be part of an existing RT ticket.".format(', '.join(pids))
-
-    return message
-
 def create_list_objects_url(from_date, to_date):
     return ("{}/object?fromDate={}&toDate={}").format(BASE_URL,
                                                       from_date,
@@ -160,7 +151,7 @@ def get_metadata(doc):
         format_id = o.find('formatId').text
         pid = o.find('identifier').text
 
-        if format_id == EML_FMT_ID and pid.startswith(PID_STARTSWITH):
+        if format_id == EML_FMT_ID and (pid.startswith(PID_STARTSWITH) or pid.startswith(PID_STARTSWITH_ALT)):
             metadata.append(o.find('identifier').text)
 
     return metadata
@@ -250,13 +241,9 @@ def main():
 
         pids = get_metadata(doc)
         tickets = create_or_update_tickets(pids)
-        autogen_pids = [pid for pid in pids if pid.startswith(PID_STARTSWITH_ALT)]
 
         if len(tickets) > 0:
             send_message(create_tickets_message(tickets))
-
-        if len(autogen_pids) > 0:
-            send_message(create_autogen_pid_message(autogen_pids))
 
     save_last_run(to_date)
 
