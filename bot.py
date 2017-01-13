@@ -27,7 +27,7 @@ RT_PASS = os.environ.get("RT_PASS")
 
 # Hard-coded variables
 PID_STARTSWITH = "arctic-data."
-PID_STARTSWITH_ALT = "autogen"
+PID_STARTSWITH_ALT = "autogen."
 EML_FMT_ID = "eml://ecoinformatics.org/eml-2.1.1"
 
 
