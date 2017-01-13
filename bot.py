@@ -21,7 +21,6 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 LASTFILE_PATH = os.environ.get("LASTFILE_PATH")
 BASE_URL = os.environ.get("BASE_URL")
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
-USERS = os.environ.get("USERS")
 RT_URL = os.environ.get("RT_URL")
 RT_USER = os.environ.get("RT_USER")
 RT_PASS = os.environ.get("RT_PASS")
@@ -90,11 +89,11 @@ def create_list_objects_message(count, url):
         objects = "objects"
         was = "were"
 
-    template = ("Hey {}, {} {} {} just modified. "
+    template = ("Hey: {} {} {} just modified. "
                 "Just thought I'd let you know. "
                 "You can see more detail at {}.")
 
-    message = template.format(USERS, count, objects, was, url_esc)
+    message = template.format(count, objects, was, url_esc)
 
     return message
 
@@ -213,7 +212,7 @@ def create_or_update_tickets(identifiers):
     tracker = rt.Rt("{}/REST/1.0/".format(RT_URL), RT_USER, RT_PASS)
 
     if tracker.login() is False:
-        send_message("Hey @bryce, I failed to log into RT. Something's wrong!")
+        send_message("I failed to log into RT. Something's wrong!")
         raise Exception("Failed to log in to RT.")
 
     for identifier in identifiers:
