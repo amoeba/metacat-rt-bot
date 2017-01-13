@@ -163,7 +163,8 @@ def ticket_find(tracker, pid):
     # Strip version stringn from PID
     # i.e. arctic-data.X.Y => arctic-data.X
     # so a new ticket isn't created for updates
-    pid_noversion = '.'.join(pid.split('.')[0:2])
+    tokens = pid.split('.')
+    pid_noversion = '.'.join(tokens[0:(len(tokens)-1)])
 
     title = '{}'.format(pid_noversion)
     results = tracker.search(Queue='arcticdata', Subject__like=title)
