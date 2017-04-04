@@ -235,7 +235,7 @@ def ticket_create(tracker, pid):
 
 
 def create_ticket_text(pid):
-    template = """A new submission just came in. View it here: https://arcticdata.io/catalog/#view/{}. This ticket was automatically created by the listobjects bot because the PID {} was created/modified. See https://github.nceas.ucsb.edu/KNB/arctic-data/blob/master/docs/handling-submissions.md for more information on what to do. If you aren't sure why this ticket was created, please see the README at https://github.nceas.ucsb.edu/KNB/submissions-bot.")"""
+    template = """A new submission just came in. View it here: https://arcticdata.io/catalog/#view/{}. This ticket was automatically created by the submissions bot because the PID {} was created/modified. See https://github.nceas.ucsb.edu/KNB/arctic-data/blob/master/docs/handling-submissions.md for more information on what to do. If you aren't sure why this ticket was created, please see the README at https://github.nceas.ucsb.edu/KNB/submissions-bot.")"""
 
     return template.format(pid, pid)
 
@@ -340,7 +340,6 @@ def main():
 
             return
 
-    # Continue normal bot operation
     from_date = get_last_run()
     to_date = now()
 
@@ -349,8 +348,6 @@ def main():
     count = get_count(doc)
 
     if count > 0:
-        # send_message(create_list_objects_message(count, url))
-
         pids = get_metadata(doc)
         tickets = create_or_update_tickets(pids)
 
