@@ -20,7 +20,7 @@ import re
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 LASTFILE_PATH = os.environ.get("LASTFILE_PATH")
-BASE_URL = os.environ.get("BASE_URL")
+MN_BASE_URL = os.environ.get("MN_BASE_URL")
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
 RT_URL = os.environ.get("RT_URL")
 RT_USER = os.environ.get("RT_USER")
@@ -110,7 +110,7 @@ def create_tickets_message(tickets):
     return message
 
 def create_list_objects_url(from_date, to_date):
-    return ("{}/object?fromDate={}&toDate={}").format(BASE_URL,
+    return ("{}/object?fromDate={}&toDate={}").format(MN_BASE_URL,
                                                       from_date,
                                                       to_date)
 
