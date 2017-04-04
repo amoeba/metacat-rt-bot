@@ -26,6 +26,15 @@ RT_URL = os.environ.get("RT_URL")
 RT_USER = os.environ.get("RT_USER")
 RT_PASS = os.environ.get("RT_PASS")
 
+# Token handling code: Try to load the token at bot initialization
+# and leave it set to None if the token file is not found or not readable
+TOKEN_PATH = os.environ.get("TOKEN_PATH")
+TOKEN = None
+
+if os.path.exists(TOKEN_PATH):
+    with open(TOKEN_PATH, 'rb') as f:
+        TOKEN = f.read()
+
 # Hard-coded variables
 PID_STARTSWITH = "arctic-data."
 PID_STARTSWITH_ALT = "autogen."
@@ -103,8 +112,9 @@ def create_tickets_message(tickets):
     message = "The following tickets were just created or updated:\n"
 
     for ticket in set(tickets):
+        ticket_info = tracker.get_ticket(ticket)
         ticket_url = "{}/Ticket/Display.html?id={}".format(RT_URL, ticket)
-        line = "- {}\n".format(ticket_url)
+        line = "- {} {}\n".format(ticket_info['Subject'], ticket_url)
         message += line
 
     return message
@@ -157,7 +167,26 @@ def get_metadata(doc):
 
     return metadata
 
+def get_dataset_title(pid):
+    # Stop now if the token isn't set up
+    if TOKEN is None:
+        return None
 
+    # Grab the doc
+    req = requests.get("/".join([MN_BASE_URL, 'object', pid]),
+                        headers = { "Authorization" : " ".join( ["Bearer", str(TOKEN)] )})
+
+    if req.status_code != 200:
+        return None
+
+    doc = ET.fromstring(req.text)
+    titles = doc.findall(".//title")
+
+    if len(titles) < 1:
+        return None
+    else:
+        return titles[0].text[0:40]
+    
 # RT functions
 
 def ticket_find(tracker, pid):
@@ -178,8 +207,28 @@ def ticket_find(tracker, pid):
 
 
 def ticket_create(tracker, pid):
+    # Try to get extra metadata about the pid
+    title = get_dataset_title(pid)
+    last_name = get_last_name(pid)
+
+    # Produce a nicer title in the event submitter or title are None
+    if title is None and last_name is None:
+        subject = pid
+    
+    # title + PID
+    if title is not None and last_name is None:
+        subject = "{} ({})".format(title, pid)
+
+    # last_name + PID
+    if title is None and last_name is not None:
+        subject = "{} ({})".format(last_name, pid)
+    
+    # last_name + title + PID
+    if title is not None and last_name is not None:
+        subject = "{} - {} ({})".format(last_name, title, pid)
+    
     ticket = tracker.create_ticket(Queue='arcticdata',
-                                   Subject="New submission: {}".format(pid),
+                                   Subject=subject,
                                    Text=create_ticket_text(pid))
 
     return ticket
@@ -220,15 +269,34 @@ def create_or_update_tickets(identifiers):
     return tickets
 
 
-def get_last_name(subject):
+def get_sysmeta_submitter(pid):
+    req = requests.get("/".join([MN_BASE_URL, 'meta', pid]),
+                        headers = { "Authorization" : " ".join( ["Bearer", str(TOKEN)] )})
+
+    if req.status_code != 200:
+        return None
+
+    doc = ET.fromstring(req.text)
+    submitters = doc.findall(".//submitter")
+
+    if len(submitters) < 1:
+        return None
+    else:
+        return submitters[0].text
+
+def get_last_name(pid):
     last_name = None
 
-    if re.search('orcid', subject):
-        last_name = get_last_name_orcid(subject)
-    elif subject.lower().startswith('uid='):
-        last_name = get_last_name_dn(subject)
-    else:
-        last_name = subject
+    # Try to get the sysmeta submitter
+    submitter = get_sysmeta_submitter(pid)
+
+    if submitter is None:
+        return None
+
+    if re.search('orcid', submitter):
+        last_name = get_last_name_orcid(submitter)
+    elif submitter.lower().startswith('uid='):
+        last_name = get_last_name_dn(submitter)
 
     return last_name
 
