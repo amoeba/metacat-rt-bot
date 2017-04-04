@@ -14,6 +14,7 @@ from xml.etree import ElementTree
 import requests
 from dotenv import load_dotenv
 import rt
+import re
 
 # Dynamic variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
@@ -218,6 +219,48 @@ def create_or_update_tickets(identifiers):
 
     return tickets
 
+
+def get_last_name(subject):
+    last_name = None
+
+    if re.search('orcid', subject):
+        last_name = get_last_name_orcid(subject)
+    elif subject.lower().startswith('uid='):
+        last_name = get_last_name_dn(subject)
+    else:
+        last_name = subject
+
+    return last_name
+
+def get_last_name_dn(subject):
+    '''todo'''
+    tokens = dict([part.lower().split('=') for part in subject.split(',')])
+
+    if 'uid' in tokens:
+        return tokens['uid']
+    else:
+        return subject
+    
+def get_last_name_orcid(subject):
+    orcid_id = parse_orcid_id(subject)
+    
+    req = requests.get("/".join(["http://pub.orcid.org", orcid_id]),
+                       headers={'Accept':'application/orcid+json'})
+    
+    if req.status_code != 200:
+        return subject
+
+    resp = req.json()
+
+    return resp['orcid-profile']['orcid-bio']['personal-details']['family-name']['value']
+
+def parse_orcid_id(value):
+    match = re.search("\d{4}-\d{4}-\d{4}-[\dX]{4}", value)
+
+    if match is None:
+        return value
+    else:
+        return match.group(0)
 
 def main():
     # Process arguments
