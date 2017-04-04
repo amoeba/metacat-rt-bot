@@ -10,7 +10,7 @@ import sys
 import os.path
 import json
 import datetime
-from xml.etree import ElementTree
+import xml.etree.ElementTree as ET
 import requests
 from dotenv import load_dotenv
 import rt
@@ -121,8 +121,8 @@ def list_objects(url):
     response = requests.get(url)
 
     try:
-        xmldoc = ElementTree.fromstring(response.content)
-    except ElementTree.ParseError as err:
+        xmldoc = ET.fromstring(response.content)
+    except ET.ParseError as err:
         print("Error while parsing list_objects() response.")
         print("Error: {}".format(err))
         print("Response content:")
