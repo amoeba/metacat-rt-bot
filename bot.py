@@ -33,7 +33,7 @@ TOKEN = None
 
 if os.path.exists(TOKEN_PATH):
     with open(TOKEN_PATH, 'rb') as f:
-        TOKEN = f.read()
+        TOKEN = f.read().decode('utf-8')
 
 # Log in to RT
 TRACKER = rt.Rt("{}/REST/1.0/".format(RT_URL), RT_USER, RT_PASS)
@@ -181,8 +181,7 @@ def get_dataset_title(pid):
 
     # Grab the doc
     req = requests.get("/".join([MN_BASE_URL, 'object', pid]),
-                        headers = { "Authorization" : " ".join( ["Bearer", str(TOKEN)] )})
-
+                        headers = { "Authorization" : " ".join(["Bearer", TOKEN]) })
     if req.status_code != 200:
         return None
 
@@ -270,7 +269,7 @@ def create_or_update_tickets(identifiers):
 
 def get_sysmeta_submitter(pid):
     req = requests.get("/".join([MN_BASE_URL, 'meta', pid]),
-                        headers = { "Authorization" : " ".join( ["Bearer", str(TOKEN)] )})
+                        headers = { "Authorization" : " ".join( ["Bearer", TOKEN] )})
 
     if req.status_code != 200:
         return None
