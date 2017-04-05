@@ -219,21 +219,19 @@ def ticket_create(pid):
     last_name = get_last_name(pid)
 
     # Produce a nicer title in the event submitter or title are None
-    if title is None and last_name is None:
-        subject = pid
-    
+
     # title + PID
     if title is not None and last_name is None:
         subject = "{} ({})".format(title, pid)
-
     # last_name + PID
-    if title is None and last_name is not None:
+    elif title is None and last_name is not None:
         subject = "{} ({})".format(last_name, pid)
-    
     # last_name + title + PID
-    if title is not None and last_name is not None:
+    elif title is not None and last_name is not None:
         subject = "{} - {} ({})".format(last_name, title, pid)
-    
+    else:
+        subject = pid
+
     ticket = TRACKER.create_ticket(Queue='arcticdata',
                                    Subject=subject,
                                    Text=create_ticket_text(pid))
