@@ -35,6 +35,13 @@ if os.path.exists(TOKEN_PATH):
     with open(TOKEN_PATH, 'rb') as f:
         TOKEN = f.read()
 
+# Log in to RT
+TRACKER = rt.Rt("{}/REST/1.0/".format(RT_URL), RT_USER, RT_PASS)
+
+if TRACKER.login() is False:
+    send_message("I failed to log into RT. Something's wrong!")
+    raise Exception("Failed to log in to RT.")
+
 # Hard-coded variables
 PID_STARTSWITH = "arctic-data."
 PID_STARTSWITH_ALT = "autogen."
@@ -112,7 +119,7 @@ def create_tickets_message(tickets):
     message = "The following tickets were just created or updated:\n"
 
     for ticket in set(tickets):
-        ticket_info = tracker.get_ticket(ticket)
+        ticket_info = TRACKER.get_ticket(ticket)
         ticket_url = "{}/Ticket/Display.html?id={}".format(RT_URL, ticket)
         line = "- {} {}\n".format(ticket_info['Subject'], ticket_url)
         message += line
@@ -189,7 +196,7 @@ def get_dataset_title(pid):
     
 # RT functions
 
-def ticket_find(tracker, pid):
+def ticket_find(pid):
     # Strip version stringn from PID
     # i.e. arctic-data.X.Y => arctic-data.X
     # so a new ticket isn't created for updates
@@ -197,7 +204,7 @@ def ticket_find(tracker, pid):
     pid_noversion = '.'.join(tokens[0:(len(tokens)-1)])
 
     title = '{}'.format(pid_noversion)
-    results = tracker.search(Queue='arcticdata', Subject__like=title)
+    results = TRACKER.search(Queue='arcticdata', Subject__like=title)
     ids = [t['id'].replace('ticket/', '') for t in results]
 
     if len(ids) > 0:
@@ -206,7 +213,7 @@ def ticket_find(tracker, pid):
         return None
 
 
-def ticket_create(tracker, pid):
+def ticket_create(pid):
     # Try to get extra metadata about the pid
     title = get_dataset_title(pid)
     last_name = get_last_name(pid)
@@ -227,7 +234,7 @@ def ticket_create(tracker, pid):
     if title is not None and last_name is not None:
         subject = "{} - {} ({})".format(last_name, title, pid)
     
-    ticket = tracker.create_ticket(Queue='arcticdata',
+    ticket = TRACKER.create_ticket(Queue='arcticdata',
                                    Subject=subject,
                                    Text=create_ticket_text(pid))
 
@@ -240,8 +247,8 @@ def create_ticket_text(pid):
     return template.format(pid, pid)
 
 
-def ticket_reply(tracker, ticket_id, identifier):
-    tracker.comment(ticket_id,
+def ticket_reply(ticket_id, identifier):
+    TRACKER.comment(ticket_id,
                     text="PID {} was updated and needs moderation. If you aren't sure why this comment was made, please see the README at https://github.nceas.ucsb.edu/KNB/submissions-bot.".format(identifier))
 
 
@@ -251,19 +258,13 @@ def create_or_update_tickets(identifiers):
     if len(identifiers) <= 0:
         return tickets
 
-    tracker = rt.Rt("{}/REST/1.0/".format(RT_URL), RT_USER, RT_PASS)
-
-    if tracker.login() is False:
-        send_message("I failed to log into RT. Something's wrong!")
-        raise Exception("Failed to log in to RT.")
-
     for identifier in identifiers:
-        ticket = ticket_find(tracker, identifier)
+        ticket = ticket_find(identifier)
 
         if ticket is None:
-            tickets.append(ticket_create(tracker, identifier))
+            tickets.append(ticket_create(identifier))
         else:
-            ticket_reply(tracker, ticket, identifier)
+            ticket_reply(ticket, identifier)
             tickets.append(ticket)
 
     return tickets
