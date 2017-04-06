@@ -268,6 +268,9 @@ def create_or_update_tickets(identifiers):
 
 
 def get_sysmeta_submitter(pid):
+    if TOKEN is None:
+        return None
+
     req = requests.get("/".join([MN_BASE_URL, 'meta', pid]),
                         headers = { "Authorization" : " ".join( ["Bearer", TOKEN] )})
 
