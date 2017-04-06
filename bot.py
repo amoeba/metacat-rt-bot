@@ -231,7 +231,7 @@ def ticket_create(pid):
         subject = "{} ({})".format(last_name, pid)
     # last_name + title + PID
     elif title is not None and last_name is not None:
-        subject = "{} - {} ({})".format(last_name, title, pid)
+        subject = "{}: {} ({})".format(last_name, title, pid)
     else:
         subject = pid
 
