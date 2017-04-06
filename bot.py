@@ -35,6 +35,9 @@ if os.path.exists(TOKEN_PATH):
     with open(TOKEN_PATH, 'rb') as f:
         TOKEN = f.read().decode('utf-8')
 
+if TOKEN is None:
+    raise Exception("Token was not readable, stopping bot operation.")
+
 # Log in to RT
 TRACKER = rt.Rt("{}/REST/1.0/".format(RT_URL), RT_USER, RT_PASS)
 
