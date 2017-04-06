@@ -30,9 +30,10 @@ RT_PASS = os.environ.get("RT_PASS")
 # and leave it set to None if the token file is not found or not readable
 TOKEN_PATH = os.environ.get("TOKEN_PATH")
 TOKEN = None
+TOKEN_PATH_FULL = os.path.join(os.path.dirname(__file__), TOKEN_PATH)
 
-if os.path.exists(TOKEN_PATH):
-    with open(TOKEN_PATH, 'rb') as f:
+if os.path.exists(TOKEN_PATH_FULL):
+    with open(TOKEN_PATH_FULL, 'rb') as f:
         TOKEN = f.read().decode('utf-8')
 
 if TOKEN is None:
