@@ -195,8 +195,16 @@ def get_dataset_title(pid):
     if len(titles) < 1:
         return None
     else:
-        return titles[0].text[0:40]
-    
+        return elide_text(titles[0].text, 50)
+
+def elide_text(text, at=50):
+    out = text[0:at]
+
+    if len(text) > at:
+        out = out + '...'
+
+    return out
+
 # RT functions
 
 def ticket_find(pid):
