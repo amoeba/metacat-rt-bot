@@ -123,8 +123,6 @@ def create_tickets_message(metadata_pids, tickets):
     message = "The following Objects were just created or updated:\n"
 
     for pid,ticket in zip(metadata_pids, tickets):
-        print("{} {}".format(pid, ticket))
-
         ticket_info = TRACKER.get_ticket(ticket)
         ticket_url = "{}/Ticket/Display.html?id={}".format(RT_URL, ticket)
         line = "- {} ({}) <{}|{}>\n".format(pid, get_last_name(pid), ticket_url, ticket_info['Subject'])
