@@ -119,21 +119,18 @@ def create_list_objects_message(count, url):
     return message
 
 
-def create_tickets_message(tickets):
-    message = "The following tickets were just created or updated:\n"
+def create_tickets_message(metadata_pids, tickets):
+    message = "The following Objects were just created or updated:\n"
 
-    for ticket in set(tickets):
+    for pid,ticket in zip(metadata_pids, tickets):
+        print("{} {}".format(pid, ticket))
+
         ticket_info = TRACKER.get_ticket(ticket)
         ticket_url = "{}/Ticket/Display.html?id={}".format(RT_URL, ticket)
-        line = "- {} {}\n".format(ticket_info['Subject'], ticket_url)
+        line = "- {} ({}) <{}|{}>\n".format(pid, get_last_name(pid), ticket_url, ticket_info['Subject'])
         message += line
 
     return message
-
-def create_list_objects_url(from_date, to_date):
-    return ("{}/object?fromDate={}&toDate={}").format(MN_BASE_URL,
-                                                      from_date,
-                                                      to_date)
 
 
 # Member Node functions
@@ -363,9 +360,11 @@ def main():
     if count > 0:
         pids = get_metadata(doc)
         tickets = create_or_update_tickets(pids)
+        metadata_pids = get_metadata_pids(doc)
+        tickets = create_or_update_tickets(metadata_pids)
 
         if len(tickets) > 0:
-            send_message(create_tickets_message(tickets))
+            send_message(create_tickets_message(metadata_pids, tickets))
 
     save_last_run(to_date)
 
