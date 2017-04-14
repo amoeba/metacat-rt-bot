@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import rt
 import re
 
-# Dynamic variables
+# Environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 LASTFILE_PATH = os.environ.get("LASTFILE_PATH")
@@ -94,7 +94,7 @@ def test_slack():
         print("Status: {}".format(r.status_code))
         print("Response: {}".format(r.text))
 
-    r
+    return r
 
 
 def create_list_objects_message(count, url):
@@ -135,7 +135,8 @@ def create_tickets_message(metadata_pids, tickets):
 
 # Member Node functions
 
-def list_objects(url):
+def list_objects(from_date, to_date):
+    url = ("{}/object?fromDate={}&toDate={}").format(MN_BASE_URL, from_date, to_date)
     response = requests.get(url)
 
     try:
@@ -162,7 +163,7 @@ def get_object_identifiers(doc):
     return [o.find('identifier').text for o in doc.findall("objectInfo")]
 
 
-def get_metadata(doc):
+def get_metadata_pids(doc):
     metadata = []
 
     # Filter to EML 2.1.1 objects
@@ -174,6 +175,7 @@ def get_metadata(doc):
             metadata.append(o.find('identifier').text)
 
     return metadata
+
 
 def get_dataset_title(pid):
     # Stop now if the token isn't set up
@@ -194,6 +196,7 @@ def get_dataset_title(pid):
     else:
         return elide_text(titles[0].text, 50)
 
+
 def elide_text(text, at=50):
     out = text[0:at]
 
@@ -201,6 +204,7 @@ def elide_text(text, at=50):
         out = out + '...'
 
     return out
+
 
 # RT functions
 
@@ -294,6 +298,7 @@ def get_sysmeta_submitter(pid):
     else:
         return submitters[0].text
 
+
 def get_last_name(pid):
     last_name = None
 
@@ -310,6 +315,7 @@ def get_last_name(pid):
 
     return last_name
 
+
 def get_last_name_dn(subject):
     '''todo'''
     tokens = dict([part.lower().split('=') for part in subject.split(',')])
@@ -318,7 +324,8 @@ def get_last_name_dn(subject):
         return tokens['uid']
     else:
         return subject
-    
+
+
 def get_last_name_orcid(subject):
     orcid_id = parse_orcid_id(subject)
     
@@ -332,6 +339,7 @@ def get_last_name_orcid(subject):
 
     return resp['orcid-profile']['orcid-bio']['personal-details']['family-name']['value']
 
+
 def parse_orcid_id(value):
     match = re.search("\d{4}-\d{4}-\d{4}-[\dX]{4}", value)
 
@@ -339,6 +347,7 @@ def parse_orcid_id(value):
         return value
     else:
         return match.group(0)
+
 
 def main():
     # Process arguments
@@ -353,13 +362,9 @@ def main():
     from_date = get_last_run()
     to_date = now()
 
-    url = create_list_objects_url(from_date, to_date)
-    doc = list_objects(url)
-    count = get_count(doc)
-
-    if count > 0:
-        pids = get_metadata(doc)
-        tickets = create_or_update_tickets(pids)
+    doc = list_objects(from_date, to_date)
+    
+    if get_count(doc) > 0:
         metadata_pids = get_metadata_pids(doc)
         tickets = create_or_update_tickets(metadata_pids)
 
