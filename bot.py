@@ -114,7 +114,6 @@ def create_tickets_message(metadata_pids, tickets):
 
 def list_objects(from_date, to_date):
     url = ("{}/object?fromDate={}&toDate={}").format(MN_BASE_URL, from_date.strftime("%Y-%m-%dT%H:%M:%SZ"), to_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
-    print(url)
     response = requests.get(url)
 
     try:
