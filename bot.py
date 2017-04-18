@@ -9,9 +9,11 @@
 import sys
 import os.path
 import json
-import datetime
+from datetime import datetime
+import pytz
 import xml.etree.ElementTree as ET
 import requests
+import requests.sessions
 from dotenv import load_dotenv
 import rt
 import re
@@ -54,10 +56,6 @@ EML_FMT_ID = "eml://ecoinformatics.org/eml-2.1.1"
 
 # General functions
 
-def now():
-    return datetime.datetime.utcnow().isoformat()
-
-
 def get_last_run():
     last_run = None
 
@@ -65,16 +63,20 @@ def get_last_run():
 
     if os.path.isfile(path):
         with open(path, "r") as f:
-            last_run = f.read().splitlines()[0]
-    else:
-        last_run = now()
+            file_content = f.read()
+
+            if len(file_content) > 0:
+                last_run = datetime.strptime(file_content, '%Y-%m-%dT%H:%M:%S.%f').replace(tzinfo=pytz.utc)
+
+    if last_run is None:
+        last_run = datetime.utcnow()
 
     return last_run
 
 
 def save_last_run(to_date):
     with open(os.path.join(os.path.dirname(__file__), LASTFILE_PATH), "w") as f:
-        f.write(to_date)
+        f.write(to_date.isoformat())
 
 
 # Slack functions
@@ -96,29 +98,6 @@ def test_slack():
 
     return r
 
-
-def create_list_objects_message(count, url):
-    url_esc = url.replace('&', '&amp;')  # Slack says escape ambersands
-
-    message = None
-
-    # Deal with plural forms of strings
-    if count == 1:
-        objects = "object"
-        was = "was"
-    else:
-        objects = "objects"
-        was = "were"
-
-    template = ("Hey: {} {} {} just modified. "
-                "Just thought I'd let you know. "
-                "You can see more detail at {}.")
-
-    message = template.format(count, objects, was, url_esc)
-
-    return message
-
-
 def create_tickets_message(metadata_pids, tickets):
     message = "The following Objects were just created or updated:\n"
 
@@ -134,7 +113,7 @@ def create_tickets_message(metadata_pids, tickets):
 # Member Node functions
 
 def list_objects(from_date, to_date):
-    url = ("{}/object?fromDate={}&toDate={}").format(MN_BASE_URL, from_date, to_date)
+    url = ("{}/object?fromDate={}&toDate={}").format(MN_BASE_URL, from_date.isoformat(), to_date.isoformat())
     response = requests.get(url)
 
     try:
@@ -347,6 +326,109 @@ def parse_orcid_id(value):
         return match.group(0)
 
 
+def get_tickets_with_new_incoming_correspondence(after):
+    # RT search uses local time whereas the API uses UTC. Go figure.
+    after_localtime = after.astimezone(pytz.timezone('America/Los_Angeles'))
+
+    # Start by getting recently updated tickets
+    tickets = TRACKER.search(Queue='arcticdata',
+                             order='LastUpdated',
+                             LastUpdated__gt=after_localtime.strftime("%Y-%m-%d %H:%M:%S"))
+
+    # Filter to just those with new correspondence
+    # from someone other than us in since LASTRUN
+    return [get_recent_incoming_correspondence(ticket, after) for ticket in tickets]
+
+
+def get_recent_incoming_correspondence(ticket, after):
+    ticket_id = re.search(r'\d+', ticket['id']).group(0)
+    correspondences = []
+
+    session = requests.session()
+    req = session.post(RT_URL, data = { 'user': RT_USER, 'pass': RT_PASS })
+
+    if req.status_code != 200:
+        raise Exception("Failed to log into RT.")
+
+    req = session.get("{}/REST/1.0/ticket/{}/history".format(RT_URL, ticket_id))
+
+    if req.status_code != 200:
+        raise Exception("Failed to get ticket history.")
+
+    incoming = [corr for corr in req.content.decode('utf-8').split('\n') if re.search(r'\d+: Correspondence added by .+@.+', corr)]
+
+    if len(incoming) == 0:
+        return correspondences
+
+    for inc in incoming:
+        inc_id_match = re.match(r'^(\d+)', inc)
+
+        if inc_id_match is None:
+            raise Exception("Failed to extract ticket ID from correspondence.")
+
+        req = session.get("{}/REST/1.0/ticket/{}/history/id/{}".format(RT_URL, ticket_id, inc_id_match.group(0)))
+
+        if req.status_code != 200:
+            raise Exception("Failed to get ticket history detail.")
+
+        transaction = parse_rt_transaction(req.content.decode('utf-8'))
+
+        if transaction['Created'] <= after:
+            continue
+        
+        correspondences.append(format_history_entry(transaction))
+
+    return correspondences
+
+
+def parse_rt_transaction(transaction):
+    lines = transaction.split('\n')
+    msg = {}
+    
+    for i in range(len(lines)):
+        line = lines[i]
+
+        if line.startswith('id: '):
+            msg['id'] = line.split(': ')[1]
+        elif line.startswith('Ticket: '):
+            msg['Ticket'] = line.split(': ')[1]
+        elif line.startswith('Creator: '):
+            msg['Creator'] = line.split(': ')[1]
+        elif line.startswith('Created: '):
+            msg['Created'] = parse_rt_datetime(line.split(': ')[1])
+        elif line.startswith('Type: '):
+            msg['Type'] = line.split(': ')[1]
+        elif line.startswith('Content: '):
+            content_lines = []
+            i = i+1
+
+            while( not re.search(r'\w: ', lines[i])):
+                content_lines.append(lines[i])
+                i = i+1
+
+            msg['Content'] = re.sub(r'\W{2,}', ' ', ''.join(content_lines))
+
+
+    return msg
+
+
+def parse_rt_datetime(value):
+    return datetime.strptime(value, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.utc)
+
+
+def format_history_entry(msg, trunc_at=60):
+    if len(msg['Content']) > trunc_at:
+        ellipsis = '...'
+    else:
+        ellipsis = ''
+    
+    if msg['Type'] == 'Correspond':
+        msg['Type'] = 'Correspondence'
+
+    return "{} by {}: \"{}{}\" on <{}/Ticket/Display.html?id={}|Ticket {}>".format(msg['Type'], msg['Creator'], msg['Content'][0:(trunc_at-1)], ellipsis, RT_URL, msg['Ticket'], msg['Ticket'])
+
+
+
 def main():
     # Process arguments
     args = sys.argv
@@ -358,8 +440,9 @@ def main():
             return
 
     from_date = get_last_run()
-    to_date = now()
+    to_date = datetime.utcnow()
 
+    # Notify about new submissions/updates
     doc = list_objects(from_date, to_date)
     
     if get_count(doc) > 0:
@@ -368,6 +451,13 @@ def main():
 
         if len(tickets) > 0:
             send_message(create_tickets_message(metadata_pids, tickets))
+
+    # Notify about new correspondences
+    tickets = get_tickets_with_new_incoming_correspondence(from_date)
+
+    for ticket in tickets:
+        for corr in ticket:
+            send_message(corr)
 
     save_last_run(to_date)
 
