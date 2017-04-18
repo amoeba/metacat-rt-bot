@@ -113,7 +113,8 @@ def create_tickets_message(metadata_pids, tickets):
 # Member Node functions
 
 def list_objects(from_date, to_date):
-    url = ("{}/object?fromDate={}&toDate={}").format(MN_BASE_URL, from_date.isoformat(), to_date.isoformat())
+    url = ("{}/object?fromDate={}&toDate={}").format(MN_BASE_URL, from_date.strftime("%Y-%m-%dT%H:%M:%SZ"), to_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    print(url)
     response = requests.get(url)
 
     try:
@@ -426,7 +427,6 @@ def format_history_entry(msg, trunc_at=60):
         msg['Type'] = 'Correspondence'
 
     return "{} by {}: \"{}{}\" on <{}/Ticket/Display.html?id={}|Ticket {}>".format(msg['Type'], msg['Creator'], msg['Content'][0:(trunc_at-1)], ellipsis, RT_URL, msg['Ticket'], msg['Ticket'])
-
 
 
 def main():
