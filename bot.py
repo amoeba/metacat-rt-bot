@@ -416,7 +416,7 @@ def parse_rt_datetime(value):
     return datetime.strptime(value, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.utc)
 
 
-def format_history_entry(msg, trunc_at=60):
+def format_history_entry(msg, trunc_at=120):
     if len(msg['Content']) > trunc_at:
         ellipsis = '...'
     else:
