@@ -355,7 +355,7 @@ def get_recent_incoming_correspondence(ticket, after):
     if req.status_code != 200:
         raise Exception("Failed to get ticket history.")
 
-    incoming = [corr for corr in req.content.decode('utf-8').split('\n') if re.search(r'\d+: Correspondence added by .+@.+', corr)]
+    incoming = [corr for corr in req.content.decode('utf-8').split('\n') if re.search(r'\d+: Correspondence added by .+@.+', corr) or re.search(r'\d+: Ticket created by .+@.+', corr)]    
 
     if len(incoming) == 0:
         return correspondences
@@ -424,6 +424,8 @@ def format_history_entry(msg, trunc_at=60):
     
     if msg['Type'] == 'Correspond':
         msg['Type'] = 'Correspondence'
+    elif msg['Type'] == 'Create':
+        msg['Type'] = 'Ticket created'
 
     return "{} by {}: \"{}{}\" on <{}/Ticket/Display.html?id={}|Ticket {}>".format(msg['Type'], msg['Creator'], msg['Content'][0:(trunc_at-1)], ellipsis, RT_URL, msg['Ticket'], msg['Ticket'])
 
