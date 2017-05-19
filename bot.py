@@ -416,7 +416,7 @@ def parse_rt_datetime(value):
     return datetime.strptime(value, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.utc)
 
 
-def format_history_entry(msg, trunc_at=120):
+def format_history_entry(msg, trunc_at=200):
     if len(msg['Content']) > trunc_at:
         ellipsis = '...'
     else:
@@ -427,7 +427,7 @@ def format_history_entry(msg, trunc_at=120):
     elif msg['Type'] == 'Create':
         msg['Type'] = 'Ticket created'
 
-    return "{} by {}: \"{}{}\" on <{}/Ticket/Display.html?id={}|Ticket {}>".format(msg['Type'], msg['Creator'], msg['Content'][0:(trunc_at-1)], ellipsis, RT_URL, msg['Ticket'], msg['Ticket'])
+    return "{} by {} on <{}/Ticket/Display.html?id={}|Ticket {}:\n>{}{}>".format(msg['Type'], msg['Creator'], msg['Ticket'], msg['Ticket'], msg['Content'][0:(trunc_at-1)], ellipsis, RT_URL)
 
 
 def main():
