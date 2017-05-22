@@ -427,7 +427,7 @@ def format_history_entry(msg, trunc_at=200):
     elif msg['Type'] == 'Create':
         msg['Type'] = 'Ticket created'
 
-    return "{} by {} on <{}/Ticket/Display.html?id={}|Ticket {}>:\n>{}{}".format(msg['Type'], msg['Creator'], msg['Ticket'], msg['Ticket'], msg['Content'][0:(trunc_at-1)], ellipsis, RT_URL)
+    return "{} by {} on <{}/Ticket/Display.html?id={}|Ticket {}>:\n>{}{}".format(msg['Type'], msg['Creator'], RT_URL, msg['Ticket'], msg['Ticket'], msg['Content'][0:(trunc_at-1)], ellipsis)
 
 
 def main():
