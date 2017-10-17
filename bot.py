@@ -36,7 +36,7 @@ TOKEN_PATH_FULL = os.path.join(os.path.dirname(__file__), TOKEN_PATH)
 
 if os.path.exists(TOKEN_PATH_FULL):
     with open(TOKEN_PATH_FULL, 'rb') as f:
-        TOKEN = f.read().decode('utf-8')
+        TOKEN = f.read().strip().decode('utf-8')
 
 if TOKEN is None:
     raise Exception("Token was not readable, stopping bot operation.")
