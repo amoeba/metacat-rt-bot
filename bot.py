@@ -463,7 +463,7 @@ def main():
             return
 
     if not subject_is_admin():
-        send_message("My token isn't configured properly so I can't check for new submissions.")
+        send_message("My authentication token isn't configured properly so I can't give tickets good titles like I usually do. RT tickets will still be created for new submissions though.")
         return
 
     from_date = get_last_run()
