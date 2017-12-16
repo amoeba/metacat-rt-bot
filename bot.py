@@ -63,10 +63,10 @@ def get_last_run():
 
     if os.path.isfile(path):
         with open(path, "r") as f:
-            file_content = f.read()
+            file_content = f.readline()
 
             if len(file_content) > 0:
-                last_run = datetime.strptime(file_content, '%Y-%m-%dT%H:%M:%S.%f').replace(tzinfo=pytz.utc)
+                last_run = datetime.strptime(file_content.strip(), '%Y-%m-%dT%H:%M:%S.%f').replace(tzinfo=pytz.utc)
 
     if last_run is None:
         last_run = datetime.utcnow()
