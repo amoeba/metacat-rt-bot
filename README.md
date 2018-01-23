@@ -1,4 +1,4 @@
-# submissions-bot
+# metacat-rt-bot
 
 Alerts a Slack channel (via webhook) of recently-modified objects from
 [`listObjects()`](http://jenkins-1.dataone.org/jenkins/job/API%20Documentation%20-%20trunk/ws/api-documentation/build/html/apis/MN_APIs.html#MNRead.listObjects) and creates tickets in
